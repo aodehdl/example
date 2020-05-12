@@ -35,7 +35,9 @@ public class JobConfiguration {
     @Bean
     public Job simpleJob() {
         return jobBuilderFactory.get("simpleJob")
-                .start(simpleStep1())
+                .incrementer(new RunIdIncrementer())
+                .flow(simpleStep1())
+                .end()
                 .build();
     }
 
