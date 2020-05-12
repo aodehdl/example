@@ -15,6 +15,8 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.transform.FixedLengthTokenizer;
+import org.springframework.batch.item.file.transform.Range;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -51,10 +53,19 @@ public class JobConfiguration {
     public FlatFileItemReader<Member> sampleDataReader() {
         FlatFileItemReader<Member> reader = new FlatFileItemReader<>();
         reader.setResource(new ClassPathResource("sample-data.txt"));
+
+        FixedLengthTokenizer tokenizer = new FixedLengthTokenizer();
+        // 각 전문별로 컬럼 항목이름
+        tokenizer.setNames(new String[] {"name", "age", "gender" });
+        // 전문 사이즈 나열
+        Range[] ranges = new Range[3];
+        ranges[0] = new Range(1,4);
+        ranges[1] = new Range(5,6);
+        ranges[2] = new Range(7,11);
+
+        tokenizer.setColumns(ranges);
         reader.setLineMapper(new DefaultLineMapper<Member>() {{
-            setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames(new String[] { "name", "age", "gender" });
-            }});
+            setLineTokenizer(tokenizer);
             setFieldSetMapper(new BeanWrapperFieldSetMapper<Member>() {{
                 setTargetType(Member.class);
             }});
